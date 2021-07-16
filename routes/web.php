@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserDataController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [UserDataController::class, 'index']);
+Route::post('/upload', [UserDataController::class, 'fileUpload'])->name('fileUpload');
+

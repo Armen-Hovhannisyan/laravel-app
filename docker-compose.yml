@@ -1,23 +1,30 @@
 # For more information: https://laravel.com/docs/sail
 version: '3'
 services:
-    laravel.test:
+    laravel_app:
         build:
             context: ./vendor/laravel/sail/runtimes/8.0
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-        image: sail-8.0/app
+        image: laravel_app
         ports:
             - '${APP_PORT:-80}:80'
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
+            CACHE_DRIVER: '${CACHE_DRIVER}'
+            SESSION_DRIVER: '${SESSION_DRIVER}'
+            QUEUE_CONNECTION: '${QUEUE_CONNECTION}'
+            REDIS_HOST: '${REDIS_HOST}'
+            REDIS_PASSWORD: '${REDIS_PASSWORD}'
+            REDIS_PORT: '${REDIS_PORT}'
         volumes:
             - '.:/var/www/html'
         networks:
             - sail
         depends_on:
+            - redis
             - mariadb
     mariadb:
         image: 'mariadb:10'
@@ -37,9 +44,18 @@ services:
           test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
           retries: 3
           timeout: 5s
+    redis:
+        container_name: laravel-redis
+        image: redis:4-alpine
+        ports:
+            - 6382:6379
+        volumes:
+            - redis:/data
 networks:
     sail:
         driver: bridge
 volumes:
     sailmariadb:
+        driver: local
+    redis:
         driver: local
